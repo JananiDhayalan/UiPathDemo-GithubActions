@@ -11,8 +11,8 @@ env:
   PROJECT_NAME: uipath.github.action                         
   PROJECT_FOLDER: ${{ github.action_path }}
   ORCH_URL: https://cloud.uipath.com/uipathcicddemo/DefaultTenant/orchestrator
-  ORCH_TENANT: ${{ secrets.UIPATHTENANTNAME }}
-  ORCH_CLIENT_ID: ${{ secrets.UIPATHCLIENTID }}
+  ORCH_TENANT: DefaultTenant
+  ORCH_CLIENT_ID: 8DEv1AMNXczW3y4U15LL3jYf62jK93n5
   ORCH_USER_KEY: gETpgY9fnJKqEK8knG8fZ-BZZ9Bi30kMP6g0ASGkAOiVd
   ORCH_ACC_NAME: uipathcicddemo
 
