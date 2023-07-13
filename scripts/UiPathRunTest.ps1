@@ -1,18 +1,24 @@
 <#
 .SYNOPSIS 
-    Deploy NuGet package files to orchestrator
+    Test a given package or run a test set
 
 .DESCRIPTION 
-    This script is to deploy NuGet package files (*.nupkg) to Cloud or On-Prem orchestrator.
+    Test a given package or run a test set in orchestrator
 
-.PARAMETER packages_path 
-     Required. The path to a folder containing packages, or to a package file.
+.PARAMETER project_path 
+     The path to a test package file.
+
+.PARAMETER testset 
+     The name of the test set to execute. The test set should use the latest version of the test cases. If the test set does not belong to the default folder (organization unit) it must be prefixed with the folder name, e.g. AccountingTeam\TestSet
 
 .PARAMETER orchestrator_url 
     Required. The URL of the Orchestrator instance.
 
 .PARAMETER orchestrator_tenant 
     Required. The tenant of the Orchestrator instance.
+
+.PARAMETER result_path 
+    Results file path
 
 .PARAMETER orchestrator_user
     Required. The Orchestrator username used for authentication. Must be used together with the password.
@@ -29,8 +35,14 @@
 .PARAMETER folder_organization_unit
     The Orchestrator folder (organization unit).
 
-.PARAMETER environment_list
-    The comma-separated list of environments to deploy the package to. If the environment does not belong to the default folder (organization unit) it must be prefixed with the folder name, e.g. AccountingTeam\TestEnvironment
+.PARAMETER environment
+    The environment to deploy the package to. Must be used together with the project path. Required when not using a modern folder.
+
+.PARAMETER timeout
+    The time in seconds for waiting to finish test set executions. (default 7200) 
+
+.PARAMETER out
+    Type of result file
 
 .PARAMETER language
     The orchestrator language.
@@ -38,21 +50,29 @@
 .PARAMETER disableTelemetry
     Disable telemetry data.
 
+
 .EXAMPLE
-SYNTAX
-    . '\UiPathDeploy.ps1' <packages_path> <orchestrator_url> <orchestrator_tenant> [-orchestrator_user <orchestrator_user> -orchestrator_pass <orchestrator_pass>] [-UserKey <UserKey> -account_name <account_name>] [-folder_organization_unit <folder_organization_unit>] [-environment_list <environment_list>] [-language <language>]
-Examples:
-    . '\UiPathDeploy.ps1' "C:\UiPath\Project 1" "https://uipath-orchestrator.myorg.com" default -orchestrator_user admin -orchestrator_pass 123456
-    . '\UiPathDeploy.ps1' "C:\UiPath\Project\Package.1.0.6820.22047.nupkg" "https://uipath-orchestrator.myorg.com" default -orchestrator_user admin -orchestrator_pass 123456 -folder_organization_unit OurOrganization
-    . '\UiPathDeploy.ps1' "C:\UiPath\Project\Package.1.0.6820.22047.nupkg" "https://uipath-orchestrator.myorg.com" default -UserKey a7da29a2c93a717110a82 -account_name myAccount
-    . '\UiPathDeploy.ps1' "C:\UiPath\Project\TestsPackage.1.0.6820.22047.nupkg" "https://uipath-orchestrator.myorg.com" default -orchestrator_user admin -orchestrator_pass 123456 -environment_list SAPEnvironment,ExcelAutomationEnvironment -language en-US
+.\UiPathRunTest.ps1 <orchestrator_url> <orchestrator_tenant> [-project_path <package>] [-testset <testset>] [-orchestrator_user <orchestrator_user> -orchestrator_pass <orchestrator_pass>] [-UserKey <auth_token> -account_name <account_name>] [-environment <environment>] [-folder_organization_unit <folder_organization_unit>] [-language <language>]
+
+  Examples:
+    .\UiPathRunTest.ps1 "https://uipath-orchestrator.myorg.com" default -orchestrator_user admin -orchestrator_pass 123456 -S "MyRobotTests"
+    .\UiPathRunTest.ps1 "https://uipath-orchestrator.myorg.com" default -orchestrator_user admin -orchestrator_pass 123456 -project_path "C:\UiPath\Project\project.json" -environment TestingEnv
+    .\UiPathRunTest.ps1 "https://uipath-orchestrator.myorg.com" default -orchestrator_user admin -orchestrator_pass 123456 -project_path "C:\UiPath\Project\project.json" -folder_organization_unit MyFolder
+    .\UiPathRunTest.ps1 "https://uipath-orchestrator.myorg.com" default -orchestrator_user admin -orchestrator_pass 123456 -project_path "C:\UiPath\Project\project.json" -folder_organization_unit MyFolder -environment MyEnvironment
+    .\UiPathRunTest.ps1 "https://uipath-orchestrator.myorg.com" default -UserKey a7da29a2c93a717110a82 -account_name myAccount -testset "MyRobotTests"
+    .\UiPathRunTest.ps1 "https://uipath-orchestrator.myorg.com" default -UserKey a7da29a2c93a717110a82 -account_name myAccount -project_path "C:\UiPath\Project\project.json" -environment TestingEnv -out junit
+    .\UiPathRunTest.ps1 "https://uipath-orchestrator.myorg.com" default -UserKey a7da29a2c93a717110a82 -account_name myAccount -project_path "C:\UiPath\Project\project.json" -environment TestingEnv -result_path "C:\results.json" -out uipath -language en-US
 #>
 Param (
 
     #Required
-	[string] $packages_path = "", # Required. The path to a folder containing packages, or to a package file.
-	[string] $orchestrator_url = "", #Required. The URL of the Orchestrator instance.
+    [string] $orchestrator_url = "", #Required. The URL of the Orchestrator instance.
 	[string] $orchestrator_tenant = "", #Required. The tenant of the Orchestrator instance.
+
+	[string] $project_path = "", #The path to a test package file.
+	[string] $testset = "", #The name of the test set to execute. The test set should use the latest version of the test cases. If the test set does not belong to the default folder (organization unit) it must be prefixed with the folder name, e.g. AccountingTeam\TestSet
+
+	[string] $result_path = "", #Results file path
 
     #cloud - Required
     [string] $account_name = "", #Required. The Orchestrator CloudRPA account name. Must be used together with the refresh token and client id.
@@ -63,12 +83,11 @@ Param (
 	[string] $orchestrator_pass = "", #Required. The Orchestrator password used for authentication. Must be used together with the username
 	
 	[string] $folder_organization_unit = "", #The Orchestrator folder (organization unit).
-	[string] $language = "", #The orchestrator language.  
-    [string] $environment_list = "", #The comma-separated list of environments to deploy the package to. If the environment does not belong to the default folder (organization unit) it must be prefixed with the folder name, e.g. AccountingTeam\TestEnvironment
-    [string] $disableTelemetry = "" #Disable telemetry data.   
-    
-    
-
+	[string] $language = "", #-l, --language                  The orchestrator language.  
+    [string] $environment = "", #The environment to deploy the package to. Must be used together with the project path. Required when not using a modern folder.
+    [string] $disableTelemetry = "", #-y, --disableTelemetry          Disable telemetry data.   
+    [string] $timeout = "", # The time in seconds for waiting to finish test set executions. (default 7200) 
+    [string] $out = "" #Type of result file
 )
 function WriteLog
 {
@@ -85,7 +104,7 @@ function WriteLog
 	}
 }
 $scriptPath = Split-Path -Parent $MyInvocation.MyCommand.Path
-$debugLog = "$scriptPath\orchestrator-package-deploy.log"
+$debugLog = "$scriptPath\orchestrator-test-run.log"
 
 #Verifying UiPath CLI folder
 $uipathCLI = "$scriptPath\uipathcli\lib\net461\uipcli.exe"
@@ -112,12 +131,13 @@ WriteLog "uipcli location :   $uipathCLI"
 
 $ParamList = New-Object 'Collections.Generic.List[string]'
 
-if($packages_path -eq "" -or $orchestrator_url -eq "" -or $orchestrator_tenant -eq "") 
+if($orchestrator_url -eq "" -or $orchestrator_tenant -eq "") 
 {
     WriteLog "Fill the required paramters"
     exit 1
 }
 
+#required parameters (Cloud accountName and userkey) or (on-prem username and password) 
 if($account_name -eq "" -or $UserKey -eq "")
 {
     if($orchestrator_user -eq "" -or $orchestrator_pass -eq "")
@@ -128,12 +148,29 @@ if($account_name -eq "" -or $UserKey -eq "")
     }
 }
 
+if($project_path -eq "" -and $testset -eq "")
+{
+    WriteLog "Either TestSet or Project path is required to fill"
+    exit 1
+}
 #Building uipath cli paramters
-$ParamList.Add("package")
-$ParamList.Add("deploy")
-$ParamList.Add($packages_path)
+$ParamList.Add("test")
+$ParamList.Add("run")
 $ParamList.Add($orchestrator_url)
 $ParamList.Add($orchestrator_tenant)
+
+if($project_path -ne ""){
+    $ParamList.Add("-P")
+    $ParamList.Add($project_path)
+}
+if($testset -ne ""){
+    $ParamList.Add("-s")
+    $ParamList.Add($testset)
+}
+if($result_path -ne ""){
+    $ParamList.Add("-r")
+    $ParamList.Add($result_path)
+}
 
 if($account_name -ne ""){
     $ParamList.Add("-a")
@@ -142,7 +179,6 @@ if($account_name -ne ""){
 if($UserKey -ne ""){
     $ParamList.Add("-t")
     $ParamList.Add($UserKey)
-
 }
 if($orchestrator_user -ne ""){
     $ParamList.Add("-u")
@@ -156,11 +192,18 @@ if($folder_organization_unit -ne ""){
     $ParamList.Add("-o")
     $ParamList.Add($folder_organization_unit)
 }
-if($environment_list -ne ""){
+if($environment -ne ""){
     $ParamList.Add("-e")
-    $ParamList.Add($environment_list)
+    $ParamList.Add($environment)
 }
-
+if($timeout -ne ""){
+    $ParamList.Add("-w")
+    $ParamList.Add($timeout)
+}
+if($out -ne ""){
+    $ParamList.Add("--out")
+    $ParamList.Add($out)
+}
 if($language -ne ""){
     $ParamList.Add("-l")
     $ParamList.Add($language)
@@ -171,7 +214,8 @@ if($disableTelemetry -ne ""){
     $ParamList.Add($disableTelemetry)
 }
 
-#mask sensitive info before logging 
+
+#mask sensitive infos before loging
 $ParamMask = New-Object 'Collections.Generic.List[string]'
 $ParamMask.AddRange($ParamList)
 $secretIndex = $ParamMask.IndexOf("-p");
@@ -194,6 +238,6 @@ if($LASTEXITCODE -eq 0)
     WriteLog "Done!"
     Exit 0
 }else {
-    WriteLog "Unable to deploy project. Exit code $LASTEXITCODE"
+    WriteLog "Unable to run test. Exit code $LASTEXITCODE"
     Exit 1
 }
