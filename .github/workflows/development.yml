@@ -13,7 +13,7 @@ env:
   ORCH_URL: https://cloud.uipath.com/uipathcicddemo/DefaultTenant/orchestrator
   ORCH_TENANT: DefaultTenant
   ORCH_CLIENT_ID: 8DEv1AMNXczW3y4U15LL3jYf62jK93n5
-  ORCH_USER_KEY: gETpgY9fnJKqEK8knG8fZ-BZZ9Bi30kMP6g0ASGkAOiVd
+  ORCH_USER_KEY: 4rWGjGuRjeVRyYlIJLQ65R_ku0mCMnt76MnzIIQqVSugF
   ORCH_ACC_NAME: uipathcicddemo
 
 jobs:
