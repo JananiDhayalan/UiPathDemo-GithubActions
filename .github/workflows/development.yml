@@ -11,10 +11,10 @@ env:
   PROJECT_NAME: uipath.github.action                         
   PROJECT_FOLDER: ${{ github.action_path }}
   ORCH_URL: https://cloud.uipath.com/uipathcicddemo/DefaultTenant/orchestrator
-  ORCH_TENANT: ${{ secrets.UIPATHTENANTNAME }}
-  ORCH_CLIENT_ID: ${{ secrets.UIPATHCLIENTID }}
-  ORCH_USER_KEY: ${{ secrets.UIPATHUSERKEY }}
-  ORCH_ACC_NAME: ${{ secrets.UIPATHACCOUNTNAME }}
+  ORCH_TENANT: DefaultTenant
+  ORCH_CLIENT_ID: 8DEv1AMNXczW3y4U15LL3jYf62jK93n5
+  ORCH_USER_KEY: m072QV_DYHH9GgMrjfm9GXksz3Seh9JouihKY1qdlLknY
+  ORCH_ACC_NAME: uipathcicddemo
 
 jobs:
   print-details:
@@ -80,19 +80,20 @@ jobs:
 #       - name: Test the Package With Test Cases 
 #         run: ${{ github.workspace }}\scripts\\UiPathRunTest.ps1  ${{env.ORCH_URL}} ${{env.ORCH_TENANT}} -UserKey ${{env.ORCH_USER_KEY}} -account_name ${{env.ORCH_ACC_NAME}} -testset "TestSet1"
   
-#   # Create Pull Request for Merge & Review
-#   create-pull-request:
-#     needs: test-uipath-published-package
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Check out repository code
-#         uses: actions/checkout@v2
-#       - name: pull-request
-#         uses: repo-sync/pull-request@v2
-#         with:
-#           destination_branch: "master"
-#           github_token: ${{ secrets.GITHUB_TOKEN }}
-#           pr_label: "feature, automated pr"
-#           pr_title: "Pull Request From Github Action"
+  # Create Pull Request for Merge & Review
+  create-pull-request:
+    needs: publish-uipath-nuget-package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - name: pull-request
+        uses: repo-sync/pull-request@v2
+        with:
+          destination_branch: "main"
+          github_token: ${{ secrets.TOKEN}}
+          pr_label: "feature, automated pr"
+          pr_title: "Pull Request From Github Action"
+
 
 
