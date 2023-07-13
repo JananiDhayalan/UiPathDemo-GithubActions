@@ -3,7 +3,7 @@ name: Production workflow
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   print-details:
@@ -36,10 +36,10 @@ jobs:
       PROJECT_NAME: GitHub_Uipath_Example                         
       PROJECT_FOLDER: ${{ github.action_path }}
       ORCH_URL: https://cloud.uipath.com/uipathcicddemo/DefaultTenant/orchestrator
-      ORCH_TENANT: ${{ secrets.UIPATHTENANTNAME }}
-      ORCH_CLIENT_ID: ${{ secrets.UIPATHCLIENTID }}
-      ORCH_USER_KEY: ${{ secrets.UIPATHUSERKEY }}
-      ORCH_ACC_NAME: ${{ secrets.UIPATHACCOUNTNAME }}
+      ORCH_TENANT: DefaultTenant
+      ORCH_CLIENT_ID: 8DEv1AMNXczW3y4U15LL3jYf62jK93n5
+      ORCH_USER_KEY: Jn8ct5L73jBECjGFXyBMxn2ltkAZ397-dk552LB1FHB-k
+      ORCH_ACC_NAME: masteuzyvfro
     steps: 
       - name: Check out repository code
         # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -59,6 +59,6 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: Artifacts
-      - name: Publish Nuget Package to DEV
+      - name: Publish Nuget Package to PRD
         shell: pwsh
         run: ${{ github.workspace }}\scripts\UiPathDeploy.ps1 ${{ github.workspace }}\package ${{env.ORCH_URL}} ${{env.ORCH_TENANT}} -UserKey ${{env.ORCH_USER_KEY}} -account_name ${{env.ORCH_ACC_NAME}}
