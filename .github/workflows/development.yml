@@ -99,7 +99,7 @@ jobs:
     name: Notify on Slack
     runs-on: ubuntu-latest
     # Only run this workflow when "build" workflow succeeds
-    needs: publish-uipath-nuget-package
+    needs: create-pull-request
     # Only run this workflow if it target is main branch on pull_request event
     steps:
       - uses: abinoda/slack-action@master
