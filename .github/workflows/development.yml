@@ -13,8 +13,8 @@ env:
   ORCH_URL: https://cloud.uipath.com/uipathcicddemo/DefaultTenant/orchestrator
   ORCH_TENANT: ${{ secrets.UIPATHTENANTNAME }}
   ORCH_CLIENT_ID: ${{ secrets.UIPATHCLIENTID }}
-  ORCH_USER_KEY: ${{ secrets.UIPATHUSERKEY }}
-  ORCH_ACC_NAME: ${{ secrets.UIPATHACCOUNTNAME }}
+  ORCH_USER_KEY: gETpgY9fnJKqEK8knG8fZ-BZZ9Bi30kMP6g0ASGkAOiVd
+  ORCH_ACC_NAME: uipathcicddemo
 
 jobs:
   print-details:
