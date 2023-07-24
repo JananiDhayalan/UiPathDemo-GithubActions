@@ -86,9 +86,9 @@ jobs:
     needs: publish-uipath-nuget-package
     runs-on: ubuntu-latest
     steps:
-      - name: Check out repository code
+      - name: Checkoutrepositorycode
         uses: actions/checkout@v2
-      - name: pull-request
+      - name: pullrequest
         uses: repo-sync/pull-request@v2
         with:
           destination_branch: "main"
