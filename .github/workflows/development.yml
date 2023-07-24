@@ -93,7 +93,7 @@ jobs:
         with:
           destination_branch: "main"
           github_token: ${{ secrets.TOKEN }}
-          pr_label: "feature, automated pr"
+          pr_labels: "feature, automated pr"
           pr_title: "Pull Request From Github Action"
      # "notify" workflow for slack notification
 #   notify:
