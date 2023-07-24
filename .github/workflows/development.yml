@@ -15,8 +15,7 @@ env:
   ORCH_CLIENT_ID: ${{ secrets.UIPATHCLIENTID }}
   ORCH_USER_KEY: ${{ secrets.UIPATHUSERKEY }}
   ORCH_ACC_NAME: ${{ secrets. UIPATHACCOUNTNAME}}
-
-
+  
 jobs:
   print-details:
     runs-on: ubuntu-latest
