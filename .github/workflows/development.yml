@@ -10,11 +10,11 @@ env:
   # Replace with your Orchestrator Values 
   PROJECT_NAME: uipath.github.action                         
   PROJECT_FOLDER: ${{ github.action_path }}
-  ORCH_URL: https://cloud.uipath.com/uipathcicddemo/DefaultTenant/orchestrator
-  ORCH_TENANT: DefaultTenant
-  ORCH_CLIENT_ID: 8DEv1AMNXczW3y4U15LL3jYf62jK93n5
-  ORCH_USER_KEY: m072QV_DYHH9GgMrjfm9GXksz3Seh9JouihKY1qdlLknY
-  ORCH_ACC_NAME: uipathcicddemo
+  ORCH_URL: https://cloud.uipath.com/devaovvitk/DefaultTenant/orchestrator
+  ORCH_TENANT: ${{ secrets.UIPATHTENANTNAME }}
+  ORCH_CLIENT_ID: ${{ secrets.UIPATHCLIENTID }}
+  ORCH_USER_KEY: ${{ secrets.UIPATHUSERKEY }}
+  ORCH_ACC_NAME: ${{ secrets. UIPATHACCOUNTNAME}}
 
 jobs:
   print-details:
